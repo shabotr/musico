@@ -163,6 +163,7 @@ export default class Looper extends React.Component {
 				tracksList[i].bpm = leader.bpm;
 			}
 		*/
+		
 		this.playAll();
 		this.setState({tracksList: tracksList});
 	}
