@@ -7,29 +7,27 @@ import ProgressBar from "progressbar.js";
 
 
 function init() {
+	
 	var arr = [];
 
 	tracks.forEach(function(element,i) {
+		var trackName = element.url.substring(element.url.lastIndexOf("/")+1).split(".");
+	    arr[i] = {
+	    "id": element.Id,
+	    "progress": null,
+	    "audioId": 'audio'+ (element.Id),
+	    "owner": element.owner,
+		"name": trackName[0],
+		"url": element.url,
+		"isPlaying": false,
+		"isMuted": false,
+		"duration": 0,
+		"bpm": Math.floor((Math.random() * 140) + 20),
+		}
+	});
 	
-	var trackName = element.url.substring(element.url.lastIndexOf("/")+1).split(".");
-    arr[i] = {
-    "id": element.Id,
-    "progress": null,
-    "audioId": 'audio'+ (element.Id),
-    "owner": element.owner,
-    "isSelected": true,
-	"name": trackName[0],
-	"url": element.url,
-	"isPlaying": false,
-	"isMuted": false,
-	"duration": 0,
-	"bpm": Math.floor((Math.random() * 140) + 20),
-	}
-});
 	return arr;
 }
-
-var colors = ['rgb(211,51,44)', 'rgb(139,41,140)', 'rgb(80,31,107)', 'rgb(69,93,186)', 'rgb(100,181,236)', 'rgb(222,143,57)'];
 
 export default class Looper extends React.Component {
 	constructor(props) {
@@ -40,7 +38,6 @@ export default class Looper extends React.Component {
 			isPlayAll: false, 
 		};
 
-		
 		this.playAll = this.playAll.bind(this);
 		this.stopAll = this.stopAll.bind(this);
 		this.togglePlay = this.togglePlay.bind(this);
@@ -109,34 +106,6 @@ export default class Looper extends React.Component {
 		this.setState({tracksList: tracksList});
 	}
 
-	onTrackEnded(track) {
-		const tracksList = this.state.tracksList.slice();
-		let audio = document.getElementById(track.audioId);
-
-		track.isPlaying = false;
-		audio.currentTime = 0;
-		this.setState({tracksList: tracksList});
-	}
-
-	onTrackReady(duration, track) {
-		const progressId = '#progress'+track.id;
-		track.duration = duration;
-		
-		if(track.progress === null)
-		{
-			track.progress = new ProgressBar.Circle(progressId, {
-		        color: colors[track.id-1 % colors.length],
-		        strokeWidth: 5,
-		        trailWidth: 2,
-		        trailColor: 'black',
-		        easing: 'easeInOut',
-		        text: {
-		        	value: '<i class="fa fa-fw fa-play"></i>',
-		    	}
-		    });
-		}
-	}
-
 	togglePlayAll() {		
 		if(!this.state.isPlayAll)
 		{
@@ -163,9 +132,39 @@ export default class Looper extends React.Component {
 				tracksList[i].bpm = leader.bpm;
 			}
 		*/
-		
+
 		this.playAll();
 		this.setState({tracksList: tracksList});
+	}
+
+	onTrackEnded(track) {
+		const tracksList = this.state.tracksList.slice();
+		let audio = document.getElementById(track.audioId);
+
+		track.isPlaying = false;
+		audio.currentTime = 0;
+		this.setState({tracksList: tracksList});
+	}
+
+	onTrackReady(duration, track) {
+		const colors = ['rgb(211,51,44)', 'rgb(139,41,140)', 'rgb(80,31,107)', 'rgb(69,93,186)', 'rgb(100,181,236)', 'rgb(222,143,57)'];
+		const progressId = '#progress'+track.id;
+		
+		track.duration = duration;
+		
+		if(track.progress === null)
+		{
+			track.progress = new ProgressBar.Circle(progressId, {
+		        color: colors[track.id-1 % colors.length],
+		        strokeWidth: 5,
+		        trailWidth: 2,
+		        trailColor: 'black',
+		        easing: 'easeInOut',
+		        text: {
+		        	value: '<i class="fa fa-fw fa-play"></i>',
+		    	}
+		    });
+		}
 	}
 
 	onTrashClicked(trackId) {
@@ -184,16 +183,6 @@ export default class Looper extends React.Component {
 		this.setState({tracksList: tracksList, tracksSelect: tracksSelect});
 	}
 
-	onVolumeClicked(trackId) {
-		const tracksList = this.state.tracksList.slice();
-
-		let audio = document.getElementById(tracksList[trackId].audioId);
-		tracksList[trackId].isMuted = !audio.muted;
-		audio.muted = !audio.muted;
-		
-		this.setState({tracksList: tracksList});
-	}
-
 	onTrackSelected(trackId) {
 		const tracksList = this.state.tracksList.slice();
 		const tracksSelect = this.state.tracksSelect.slice();
@@ -204,6 +193,16 @@ export default class Looper extends React.Component {
 
 		track.isSelected = true;
 		this.setState({tracksList: tracksList, tracksSelect: tracksSelect});
+	}
+	
+	onVolumeClicked(trackId) {
+		const tracksList = this.state.tracksList.slice();
+
+		let audio = document.getElementById(tracksList[trackId].audioId);
+		tracksList[trackId].isMuted = !audio.muted;
+		audio.muted = !audio.muted;
+		
+		this.setState({tracksList: tracksList});
 	}
 
   render() {
