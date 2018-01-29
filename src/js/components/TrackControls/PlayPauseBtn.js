@@ -13,9 +13,12 @@ export default class PlayPauseBtn extends React.Component {
 	handleTimeUpdate(ev) {
 		let audio = document.getElementById(this.props.track.audioId);
 		let progress = document.getElementById("progress"+this.props.track.id);
-		const value = audio.currentTime/audio.duration;
-		progress.value = value;
-		this.props.track.progress.animate(value);
+		if(audio && progress && this.props.track.progress)
+		{
+			const value = audio.currentTime/audio.duration;
+			progress.value = value;
+			this.props.track.progress.animate(value);			
+		}
 	}
 
 	handleTrackEnded(ev) {
@@ -25,7 +28,8 @@ export default class PlayPauseBtn extends React.Component {
 	updateClass()
 	{
 		const classNames = this.props.track.isPlaying ? 'fa fa-fw fa-pause' : 'fa fa-fw fa-play';
-		if(this.props.track.progress !== null) {
+		if(this.props.track.progress) 
+		{
 			this.props.track.progress.text.firstChild.className = classNames;
 		}
 	}
@@ -40,7 +44,8 @@ export default class PlayPauseBtn extends React.Component {
 							<div className="progress" id={"progress"+this.props.track.id}></div>
 						</button>
 
-						<audio 
+						<audio
+							type="audio/mpeg"
 							id={this.props.track.audioId} 
 							onTimeUpdate={this.handleTimeUpdate.bind(this)}
 							onEnded={this.handleTrackEnded.bind(this)}

@@ -23,7 +23,7 @@ function init() {
 	"isPlaying": false,
 	"isMuted": false,
 	"duration": 0,
-	"bpm": 0,
+	"bpm": Math.floor((Math.random() * 140) + 20),
 	}
 });
 	return arr;
@@ -40,12 +40,12 @@ export default class Looper extends React.Component {
 			isPlayAll: false, 
 		};
 
-		this.onSync = this.onSync.bind(this);
-		this.sortTracks = this.sortTracks.bind(this);
+		
 		this.playAll = this.playAll.bind(this);
 		this.stopAll = this.stopAll.bind(this);
 		this.togglePlay = this.togglePlay.bind(this);
 		this.togglePlayAll = this.togglePlayAll.bind(this);
+		this.onSync = this.onSync.bind(this);
 		this.onTrackEnded = this.onTrackEnded.bind(this);
 		this.onTrackReady = this.onTrackReady.bind(this);
 		this.onTrashClicked = this.onTrashClicked.bind(this);
@@ -55,23 +55,23 @@ export default class Looper extends React.Component {
 
 	playAll() {
 		const tracksList = this.state.tracksList.slice();
-		tracksList.forEach(function(track,i) {
-			track.isPlaying = true;
+		
+		tracksList.forEach(async function(track,i) {
+
 			let audio = document.getElementById(track.audioId);
+			
+			track.isPlaying = true;
 			audio.currentTime = 0;
 			audio.loop = true;
 
-  			var playPromise = audio.play();
-  			// console.log(playPromise);
-  			if (playPromise !== undefined) {
-			    playPromise.then(_ => {
-			    	//audio will play
-			    })
-			    .catch(error => {
-			      console.log(error);
-			    });
+			try {
+
+				await audio.load();
+				await audio.play();
+
+			} catch (err) {
+				console.log(err)
 			}
-  			
 		});
 
 		this.setState({tracksList: tracksList, isPlayAll: true});
@@ -147,6 +147,26 @@ export default class Looper extends React.Component {
 		}
 	}
 
+	onSync() {
+		const tracksList = this.state.tracksList.slice();
+		
+		//Reorder the tracks according to the track length
+		tracksList.sort(function(a,b){return a.duration < b.duration});
+
+		//Sync all tracks to the leader track
+		const leader = tracksList[0];
+
+		/*
+			//Sync all tracks to the leader track
+			for (var i = 0; i < tracksList.length; i++) {
+				
+				tracksList[i].bpm = leader.bpm;
+			}
+		*/
+		this.playAll();
+		this.setState({tracksList: tracksList});
+	}
+
 	onTrashClicked(trackId) {
 		const tracksList = this.state.tracksList.slice();
 		const tracksSelect = this.state.tracksSelect.slice();
@@ -183,16 +203,6 @@ export default class Looper extends React.Component {
 
 		track.isSelected = true;
 		this.setState({tracksList: tracksList, tracksSelect: tracksSelect});
-	}
-
-	sortTracks() {
-		const tracksList = this.state.tracksList.slice();
-		tracksList.sort(function(a,b){return a.duration < b.duration});
-		this.setState({tracksList: tracksList});
-	}
-
-	onSync() {
-		    this.sortTracks();
 	}
 
   render() {

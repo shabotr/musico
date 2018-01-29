@@ -25,6 +25,9 @@ export default class Track extends React.Component{
 					  	<div className="trackName">
 					  		{this.props.track.name}
 					  	</div>
+					  	<div className="trackBpm">
+					  		BPM: {this.props.track.bpm}
+					  	</div>
 					</div>
 
 					<div className="right col-4">
