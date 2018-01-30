@@ -52,26 +52,28 @@ export default class Looper extends React.Component {
 
 	playAll() {
 		const tracksList = this.state.tracksList.slice();
-		
-		tracksList.forEach(async function(track,i) {
 
-			let audio = document.getElementById(track.audioId);
-			
-			track.isPlaying = true;
-			audio.currentTime = 0;
-			audio.loop = true;
+		if(tracksList.length > 0) {
+			tracksList.forEach(async function(track,i) {
 
-			try {
+				let audio = document.getElementById(track.audioId);
+				
+				track.isPlaying = true;
+				audio.currentTime = 0;
+				audio.loop = true;
 
-				await audio.load();
-				await audio.play();
+				try {
 
-			} catch (err) {
-				console.log(err)
-			}
-		});
+					await audio.load();
+					await audio.play();
 
-		this.setState({tracksList: tracksList, isPlayAll: true});
+				} catch (err) {
+					console.log(err)
+				}
+			});
+
+			this.setState({tracksList: tracksList, isPlayAll: true});
+		}
 	}
 
 	stopAll() {
@@ -155,7 +157,7 @@ export default class Looper extends React.Component {
 		if(track.progress === null)
 		{
 			track.progress = new ProgressBar.Circle(progressId, {
-		        color: colors[track.id-1 % colors.length],
+		        color: colors[(track.id-1) % colors.length],
 		        strokeWidth: 5,
 		        trailWidth: 2,
 		        trailColor: 'black',
@@ -194,7 +196,7 @@ export default class Looper extends React.Component {
 		track.isSelected = true;
 		this.setState({tracksList: tracksList, tracksSelect: tracksSelect});
 	}
-	
+
 	onVolumeClicked(trackId) {
 		const tracksList = this.state.tracksList.slice();
 
